@@ -29,13 +29,13 @@ const Footer = () => {
                     <div>
                         <h4 className="font-semibold text-sm mb-3">Conecte-se</h4>
                         <div className="flex gap-3">
-                            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors">
+                            <a href="https://github.com/Flaviohmm" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors">
                                 <Github className="h-4 w-4" />
                             </a>
                             <a href="https://x.com/Flaviohm_2" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors">
                                 <Twitter className="h-4 w-4" />
                             </a>
-                            <a href="mailto:contato@flaviomacedo.dev" className="p-2 rounded-lg bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors">
+                            <a href="mailto:fhenrique609@gmail.com" className="p-2 rounded-lg bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors">
                                 <Mail className="h-4 w-4" />
                             </a>
                         </div>
