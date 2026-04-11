@@ -3,7 +3,7 @@ import { ArrowLeft, Clock, Share2, Twitter, Linkedin, Link as LinkIcon, ChevronR
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/Layout";
-import { getPostBySlug } from "@/data/posts";
+import { getPostBySlug, BlogPost as BlogPostType } from "@/services/api";
 import { useMemo, useEffect, useState } from "react";
 
 interface TocItem {
@@ -111,7 +111,8 @@ function renderMarkdown(markdown: string): string {
 const BlogPost = () => {
     const { slug } = useParams<{ slug: string }>();
     const { toast } = useToast();
-    const post = slug ? getPostBySlug(slug) : undefined;
+    const [post, setPost] = useState<BlogPostType | null>(null);
+    const [loading, setLoading] = useState(true);
     const [activeId, setActiveId] = useState<string>("");
 
     const toc = useMemo(() => (post ? extractToc(post.content) : []), [post]);
@@ -132,6 +133,27 @@ const BlogPost = () => {
         });
         return () => observer.disconnect();
     }, [toc]);
+
+    useEffect(() => {
+        if (!slug) return;
+
+        setLoading(true);
+
+        getPostBySlug(slug)
+            .then((data) => setPost(data))
+            .catch(() => setPost(null))
+            .finally(() => setLoading(false));
+    }, [slug]);
+
+    if (loading) {
+        return (
+            <Layout>
+                <div className="container py-20 text-center">
+                    <p>Carregando artigo...</p>
+                </div>
+            </Layout>
+        );
+    }
 
     if (!post) {
         return (

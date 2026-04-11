@@ -10,6 +10,7 @@ import BlogPost from "./pages/BlogPost.tsx";
 import Portfolio from "./pages/Portfolio.tsx";
 import About from "./pages/About.tsx";
 import Contact from "./pages/Contact.tsx";
+import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/sobre" element={<About />} />
             <Route path="/contato" element={<Contact />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
