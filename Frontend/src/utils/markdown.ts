@@ -1,23 +1,49 @@
 import { marked } from "marked";
-import hljs from "highlight.js";
 import DOMPurify from "dompurify";
+import Prism from "prismjs";
+
+// Importe apenas as linguagens que você usa (mantém leve)
+import 'prismjs/components/prism-yaml';
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-typescript';
+import 'prismjs/components/prism-bash';
+import 'prismjs/components/prism-docker';
+import 'prismjs/components/prism-json';
+
+// Tema (escolha um)
+import 'prismjs/themes/prism-tomorrow.css';
 
 const renderer = new marked.Renderer();
 
-// CODE BLOCK
-renderer.code = ({ text, lang}) => {
+// CODE BLOCK - Versão final otimizada para Prism + indentação
+renderer.code = ({ text, lang }) => {
+    const language = (lang || 'plaintext').toLowerCase().trim();
+    
+    const langMap: Record<string, string> = {
+        'yml': 'yaml',
+        'docker': 'docker',
+        'dockerfile': 'docker',
+        'shell': 'bash',
+        'sh': 'bash'
+    };
 
-    const highlighted = lang && hljs.getLanguage(lang)
-        ? hljs.highlight(text, { language: lang }).value
-        : hljs.highlightAuto(text).value
+    const prismLanguage = langMap[language] || language;
 
-    return `
-        <pre class="rounded-lg bg-muted p-4 overflow-x-auto text-sm border border-border/50">
-            <code class="hljs language-${lang || ""}">
-                ${highlighted.trim()}
-            </code>
-        </pre>
-    `;
+    let highlighted = text;
+
+    try {
+        const grammar = Prism.languages[prismLanguage] || Prism.languages.plaintext;
+        highlighted = Prism.highlight(text, grammar, prismLanguage);
+    } catch (err) {
+        console.error('Prism error:', err);
+        highlighted = text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    // HTML sem indentação extra no template (isso é o que resolve o problema)
+    return `<pre class="prism-pre rounded-lg bg-[#1e1e1e] p-4 overflow-x-auto text-sm border border-border/50"><code class="language-${prismLanguage}">${highlighted}</code></pre>`;
 };
 
 // HEADINGS COM ID (ESSENCIAL pro TOC)
@@ -92,8 +118,8 @@ renderer.tablecell = (token) => {
         align === "center"
             ? "text-center"
             : align === "right"
-            ? "text-right"
-            : "text-left";
+                ? "text-right"
+                : "text-left";
 
     if (header) {
         return `

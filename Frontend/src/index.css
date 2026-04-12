@@ -125,4 +125,29 @@
   .shadow-card-hover {
     box-shadow: var(--card-shadow-hover);
   }
+
+  /* === Prism Code Blocks - Correção de indentação === */
+  .prism-pre {
+    margin: 1.5em 0 !important;
+    padding: 1.25rem !important;
+    background-color: #1e1e1e !important;
+    border-radius: 8px !important;
+    overflow-x: auto !important;
+    white-space: pre !important;
+    tab-size: 4 !important;
+    line-height: 1.55 !important;
+    font-size: 0.875rem !important;
+  }
+
+  .prism-pre code {
+    display: block !important;
+    white-space: pre !important;
+    font-family: 'JetBrains Mono', ui-monospace, monospace !important;
+    /* usa sua fonte */
+    color: #d4d4d4 !important;
+  }
+
+  .prism-pre code span {
+    white-space: pre !important;
+  }
 }
