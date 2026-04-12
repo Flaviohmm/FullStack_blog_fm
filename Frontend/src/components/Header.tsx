@@ -21,7 +21,7 @@ const Header = () => {
         <header className="sticky py-4 top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
             <div className="container flex items-center justify-between">
                 <Link to={"/"} className="flex items-center gap-2 font-bold text-lg tracking-tight">
-                    <span className="text-gradient text-xl font-extrabold">&lt;FM/&gt;</span>
+                    <span className="bg-gradient-to-r from-indigo-600 to-cyan-500 dark:from-indigo-500 dark:to-cyan-400 bg-clip-text text-transparent text-xl font-extrabold">&lt;FM/&gt;</span>
                     <span className="hidden sm:inline">Flavio Macedo</span>
                 </Link>
 

@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/Layout";
 import { getPostBySlug, BlogPost as BlogPostType } from "@/services/api";
 import { useMemo, useEffect, useState } from "react";
+import { parseMarkdown } from "@/utils/markdown";
 
 interface TocItem {
     id: string;
@@ -15,97 +16,24 @@ interface TocItem {
 function extractToc(markdown: string): TocItem[] {
     const lines = markdown.split("\n");
     const toc: TocItem[] = [];
+
     for (const line of lines) {
         const match = line.match(/^(#{2,3})\s+(.+)/);
+
         if (match) {
             const text = match[2];
+
             const id = text
                 .toLowerCase()
                 .normalize("NFD")
                 .replace(/[\u0300-\u036f]/g, "")
                 .replace(/[^a-z0-9]+/g, "-")
                 .replace(/(^-|-$)/g, "");
+
             toc.push({ id, text, level: match[1].length });
         }
     }
     return toc;
-}
-
-function renderMarkdown(markdown: string): string {
-    let html = markdown;
-
-    // Code blocks
-    html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (_m, lang, code) => {
-        return `<pre class="rounded-lg bg-muted p-4 overflow-x-auto text-sm font-mono border border-border/50"><code class="language-${lang || ""}">${code.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code></pre>`;
-    });
-
-    // Inline code
-    html = html.replace(/`([^`]+)`/g, '<code class="rounded bg-muted px-1.5 py-0.5 text-sm font-mono text-primary">$1</code>');
-
-    // Tables
-    html = html.replace(/(\|.+\|\n)+/g, (table) => {
-        const rows = table.trim().split("\n");
-        if (rows.length < 2) return table;
-        const headerCells = rows[0].split("|").filter(Boolean).map((c) => c.trim());
-        const bodyRows = rows.slice(2);
-        let tableHtml = '<div class="overflow-x-auto my-6"><table class="w-full text-sm border-collapse"><thead><tr>';
-        headerCells.forEach((cell) => {
-            tableHtml += `<th class="border border-border/50 bg-muted px-4 py-2 text-left font-semibold">${cell}</th>`;
-        });
-        tableHtml += "</tr></thead><tbody>";
-        bodyRows.forEach((row) => {
-            const cells = row.split("|").filter(Boolean).map((c) => c.trim());
-            tableHtml += "<tr>";
-            cells.forEach((cell) => {
-                tableHtml += `<td class="border border-border/50 px-4 py-2">${cell}</td>`;
-            });
-            tableHtml += "</tr>";
-        });
-        tableHtml += "</tbody></table></div>";
-        return tableHtml;
-    });
-
-    // Blockquotes
-    html = html.replace(/^>\s*(.+)$/gm, '<blockquote class="border-l-4 border-primary/40 pl-4 py-1 my-6 text-muted-foreground italic">$1</blockquote>');
-
-    // Headers with IDs
-    html = html.replace(/^### (.+)$/gm, (_m, text) => {
-        const id = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-        return `<h3 id="${id}" class="text-xl font-bold mt-8 mb-3 scroll-mt-24">${text}</h3>`;
-    });
-    html = html.replace(/^## (.+)$/gm, (_m, text) => {
-        const id = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-        return `<h2 id="${id}" class="text-2xl font-bold mt-10 mb-4 scroll-mt-24">${text}</h2>`;
-    });
-
-    // Bold and italic
-    html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-    html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
-
-    // Ordered lists
-    html = html.replace(/(^\d+\.\s.+\n?)+/gm, (block) => {
-        const items = block.trim().split("\n").map((line) => line.replace(/^\d+\.\s/, ""));
-        return `<ol class="list-decimal list-inside space-y-1 my-4 text-muted-foreground">${items.map((i) => `<li>${i}</li>`).join("")}</ol>`;
-    });
-
-    // Unordered lists
-    html = html.replace(/(^- .+\n?)+/gm, (block) => {
-        const items = block.trim().split("\n").map((line) => line.replace(/^- /, ""));
-        return `<ul class="list-disc list-inside space-y-1 my-4 text-muted-foreground">${items.map((i) => `<li>${i}</li>`).join("")}</ul>`;
-    });
-
-    // Paragraphs (lines not already wrapped in tags)
-    html = html
-        .split("\n\n")
-        .map((block) => {
-            const trimmed = block.trim();
-            if (!trimmed) return "";
-            if (trimmed.startsWith("<")) return trimmed;
-            return `<p class="my-4 leading-relaxed text-muted-foreground">${trimmed}</p>`;
-        })
-        .join("\n");
-
-    return html;
 }
 
 const BlogPost = () => {
@@ -115,22 +43,32 @@ const BlogPost = () => {
     const [loading, setLoading] = useState(true);
     const [activeId, setActiveId] = useState<string>("");
 
-    const toc = useMemo(() => (post ? extractToc(post.content) : []), [post]);
-    const htmlContent = useMemo(() => (post ? renderMarkdown(post.content) : ""), [post]);
+    const toc = useMemo(() => (
+        post ? extractToc(post.content) : []
+    ), [post]);
+
+    const htmlContent = useMemo(() => (
+        post ? parseMarkdown(post.content) : ""
+    ), [post]);
 
     useEffect(() => {
         if (!toc.length) return;
+
         const observer = new IntersectionObserver(
             (entries) => {
                 const visible = entries.find((e) => e.isIntersecting);
                 if (visible) setActiveId(visible.target.id);
             },
-            { rootMargin: "-80px 0px -60% 0px" }
+            { 
+                rootMargin: "-80px 0px -60% 0px" 
+            }
         );
+
         toc.forEach(({ id }) => {
             const el = document.getElementById(id);
             if (el) observer.observe(el);
         });
+
         return () => observer.disconnect();
     }, [toc]);
 
@@ -222,7 +160,9 @@ const BlogPost = () => {
 
                         {/* Article body */}
                         <div
-                            className="prose-custom"
+                            className="
+                                prose prose-invert max-w-none whitespace-pre-line
+                            "
                             dangerouslySetInnerHTML={{ __html: htmlContent }}
                         />
 

@@ -7,7 +7,7 @@ const Footer = () => {
             <div className="container py-12">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div>
-                        <Link to="/" className="text-gradient text-xl font-extrabold">&lt;FM/&gt;</Link>
+                        <Link to="/" className="bg-gradient-to-r from-indigo-600 to-cyan-500 dark:from-indigo-500 dark:to-cyan-400 bg-clip-text text-transparent text-xl font-extrabold">&lt;FM/&gt;</Link>
                         <p className="mt-3 text-sm text-muted-foreground max-w-xs">
                             Linux, tecnologia, economia e liberdade. Pensamentos sobre o mundo através do código e da razão.
                         </p>
